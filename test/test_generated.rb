@@ -42,6 +42,11 @@ class TestGenerated < Minitest::Test
     generated_sample_without_loading_data("Dummy/foo.xcworkspacedata")
     generated_sample_without_loading_data("Dummy/foo.xcuserstate")
 
+    # Go-specific vendored paths
+    generated_sample_without_loading_data("go/vendor/github.com/foo.go")
+    generated_sample_without_loading_data("go/vendor/golang.org/src/foo.c")
+    generated_sample_without_loading_data("go/vendor/gopkg.in/some/nested/path/foo.go")
+
     # .NET designer file
     generated_sample_without_loading_data("Dummu/foo.designer.cs")
 
@@ -82,5 +87,8 @@ class TestGenerated < Minitest::Test
 
     # GrammarKit
     generated_sample_loading_data("Java/GrammarKit.java")
+
+    # roxygen2
+    generated_sample_loading_data("R/import.Rd")
   end
 end
