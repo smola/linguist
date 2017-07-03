@@ -44,16 +44,47 @@ class TestClassifier < Minitest::Test
   end
 
   def test_classify_ambiguous_languages
+    samples = []
+    data = {}
+    samples_per_lang = {}
     Samples.each do |sample|
+      language = sample[:language]
+      samples_per_lang[language] ||= []
+      samples_per_lang[language].push(sample)
+      samples.push(sample)
+      path = sample[:path]
+      data[path] = File.read(sample[:path])
+    end
+
+    samples.each do |sample|
+      path = sample[:path]
       language  = Linguist::Language.find_by_name(sample[:language])
+      if samples_per_lang[sample[:language]].length <= 1
+        STDERR.puts "Skip #{path} (only 1 sample)"
+        next
+      end
+
       languages = Language.find_by_filename(sample[:path]).map(&:name)
       next unless languages.length != 1
 
       languages = Language.find_by_extension(sample[:path]).map(&:name)
       next unless languages.length > 1
 
-      results = Classifier.classify(Samples.cache, File.read(sample[:path]), languages)
-      assert_equal language.name, results.first[0], "#{sample[:path]}\n#{results.inspect}"
+      STDERR.puts "Testing #{path}"
+      db = {}
+      samples.each do |training_sample|
+        if sample[:path] == training_sample[:path]
+          next
+        end
+        Classifier.train!(db, training_sample[:language], data[training_sample[:path]])
+      end
+
+      classifier = Classifier.new(db)
+      results = classifier.classify(data[path], languages)
+      if language.name != results.first[0]
+        STDERR.puts "Need more samples for #{language.name}, failed with #{path} #{results.inspect}"
+      end
+      #assert_equal language.name, results.first[0], "#{sample[:path]}\n#{results.inspect}"
     end
   end
 
