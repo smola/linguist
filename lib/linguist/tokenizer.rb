@@ -88,12 +88,16 @@ module Linguist
           else
             s.skip_until(/(?<!\\)"/)
           end
+          tokens << "\""
+          tokens << "\""
         elsif s.scan(/'/)
           if s.peek(1) == "'"
             s.getch
           else
             s.skip_until(/(?<!\\)'/)
           end
+          tokens << "'"
+          tokens << "'"
 
         # Skip number literals
         elsif s.scan(/(0x\h(\h|\.)*|\d(\d|\.)*)([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)/)

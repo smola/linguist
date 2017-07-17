@@ -9,15 +9,15 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_skip_string_literals
-    assert_equal %w(print), tokenize('print ""')
-    assert_equal %w(print), tokenize('print "Josh"')
-    assert_equal %w(print), tokenize("print 'Josh'")
-    assert_equal %w(print), tokenize('print "Hello \"Josh\""')
-    assert_equal %w(print), tokenize("print 'Hello \\'Josh\\''")
-    assert_equal %w(print), tokenize("print \"Hello\", \"Josh\"")
-    assert_equal %w(print), tokenize("print 'Hello', 'Josh'")
-    assert_equal %w(print), tokenize("print \"Hello\", \"\", \"Josh\"")
-    assert_equal %w(print), tokenize("print 'Hello', '', 'Josh'")
+    assert_equal %w(print " "), tokenize('print ""')
+    assert_equal %w(print " "), tokenize('print "Josh"')
+    assert_equal %w(print ' '), tokenize("print 'Josh'")
+    assert_equal %w(print " "), tokenize('print "Hello \"Josh\""')
+    assert_equal %w(print ' '), tokenize("print 'Hello \\'Josh\\''")
+    assert_equal %w(print " " " "), tokenize("print \"Hello\", \"Josh\"")
+    assert_equal %w(print ' ' ' '), tokenize("print 'Hello', 'Josh'")
+    assert_equal %w(print " " " " " "), tokenize("print \"Hello\", \"\", \"Josh\"")
+    assert_equal %w(print ' ' ' ' ' '), tokenize("print 'Hello', '', 'Josh'")
   end
 
   def test_skip_number_literals
@@ -73,18 +73,18 @@ class TestTokenizer < Minitest::Test
 
   def test_c_tokens
     assert_equal %w(#ifndef HELLO_H #define HELLO_H void hello \( \) ; #endif), tokenize(:"C/hello.h")
-    assert_equal %w(#include <stdio.h> int main \( \) { printf \( \) ; return ; }), tokenize(:"C/hello.c")
+    assert_equal %w(#include <stdio.h> int main \( \) { printf \( " " \) ; return ; }), tokenize(:"C/hello.c")
   end
 
   def test_cpp_tokens
     assert_equal %w(class Bar { protected char *name ; public void hello \( \) ; }), tokenize(:"C++/bar.h")
-    assert_equal %w(#include <iostream> using namespace std ; int main \( \) { cout << << endl ; }), tokenize(:"C++/hello.cpp")
+    assert_equal %w(#include <iostream> using namespace std ; int main \( \) { cout << " " << endl ; }), tokenize(:"C++/hello.cpp")
   end
 
   def test_objective_c_tokens
     assert_equal %w(#import <Foundation/Foundation.h> @interface Foo NSObject { } @end), tokenize(:"Objective-C/Foo.h")
-    assert_equal %w(#import @implementation Foo @end), tokenize(:"Objective-C/Foo.m")
-    assert_equal %w(#import <Cocoa/Cocoa.h> int main \( int argc char *argv [ ] \) { NSLog \( @ \) ; return ; }), tokenize(:"Objective-C/hello.m")
+    assert_equal %w(#import " " @implementation Foo @end), tokenize(:"Objective-C/Foo.m")
+    assert_equal %w(#import <Cocoa/Cocoa.h> int main \( int argc char *argv [ ] \) { NSLog \( @ " " \) ; return ; }), tokenize(:"Objective-C/hello.m")
   end
 
   def test_shebang
@@ -102,15 +102,15 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_javascript_tokens
-    assert_equal %w( \( function \( \) { console.log \( \) ; } \) .call \( this \) ;), tokenize(:"JavaScript/hello.js")
+    assert_equal %w( \( function \( \) { console.log \( " " \) ; } \) .call \( this \) ;), tokenize(:"JavaScript/hello.js")
   end
 
   def test_json_tokens
-    assert_equal %w( { [ ] { } } ), tokenize(:"JSON/product.json")
+    assert_equal %w( { " " " " " " " " " " [ " " " " ] " " { " " " " } } ), tokenize(:"JSON/product.json")
   end
 
   def test_ruby_tokens
     assert_equal %w(module Foo end), tokenize(:"Ruby/foo.rb")
-    assert_equal %w(task default do puts end), tokenize(:"Ruby/filenames/Rakefile")
+    assert_equal %w(task default do puts " " end), tokenize(:"Ruby/filenames/Rakefile")
   end
 end
