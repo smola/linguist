@@ -21,6 +21,8 @@ language_queries = {
 repo_blacklist = %w[
     sillsdevarchive/wsiwaf
     stijn-volckaert/ReMon-clang
+    yuzhoujr/C-Primmer
+    j316chuck/Competitive-Programming
 ]
 
 language_queries.each { |lang, queries|
