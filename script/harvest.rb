@@ -13,8 +13,15 @@ gh = Github.new oauth_token: token
 
 language_queries = {
     'C' => ['language:C include'],
-    'C++' => ['language:C++ include']
+    'C++' => ['language:C++ include'],
+    'Puppet' => ['language:Puppet extension:pp class', 'language:Pascal extension:pp include'],
+    'Pascal' => ['language:Pascal extension:pp begin']
 }
+
+repo_blacklist = %w[
+    sillsdevarchive/wsiwaf
+    stijn-volckaert/ReMon-clang
+]
 
 language_queries.each { |lang, queries|
   puts "Language: #{lang}"
@@ -29,6 +36,7 @@ language_queries.each { |lang, queries|
       name = item.name
       user = item.repository.owner.login
       repo = item.repository.name
+      next if repo_blacklist.include? "#{user}/#{repo}"
       sha = item.sha
       sample_file = File.join(samples_lang_dir, "#{user}+#{repo}+#{sha}+#{name}")
       next if File::exists? sample_file
