@@ -113,12 +113,12 @@ module Linguist
         elsif token = s.scan(/;|\{|\}|\(|\)|\[|\]/)
           tokens << token
 
-        # Regular token
-        elsif token = s.scan(/[\w\.@#\/\*]+/)
+        # Common operators
+        elsif token = s.scan(/[+\-*\/^%&|<>=]+/)
           tokens << token
 
-        # Common operators
-        elsif token = s.scan(/<<?|\+|\-|\*|\/|%|&&?|\|\|?/)
+        # Regular token
+        elsif token = s.scan(/[\w\.@#\/\*]+/)
           tokens << token
 
         else

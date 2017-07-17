@@ -59,8 +59,12 @@ class TestTokenizer < Minitest::Test
 
   def test_operators
     assert_equal %w(~~NUMLITERAL + ~~NUMLITERAL), tokenize("1 + 1")
+    assert_equal %w(~~NUMLITERAL ++ ~~NUMLITERAL), tokenize("1 ++ 1")
     assert_equal %w(~~NUMLITERAL - ~~NUMLITERAL), tokenize("1 - 1")
+    assert_equal %w(i ++), tokenize("i++")
+    assert_equal %w(i --), tokenize("i--")
     assert_equal %w(~~NUMLITERAL * ~~NUMLITERAL), tokenize("1 * 1")
+    assert_equal %w(~~NUMLITERAL ** ~~NUMLITERAL), tokenize("1 ** 1")
     assert_equal %w(~~NUMLITERAL / ~~NUMLITERAL), tokenize("1 / 1")
     assert_equal %w(~~NUMLITERAL % ~~NUMLITERAL), tokenize("2 % 5")
     assert_equal %w(~~NUMLITERAL & ~~NUMLITERAL), tokenize("1 & 1")
@@ -69,6 +73,15 @@ class TestTokenizer < Minitest::Test
     assert_equal %w(~~NUMLITERAL || ~~NUMLITERAL), tokenize("1 || 1")
     assert_equal %w(~~NUMLITERAL < ~~HEXLITERAL), tokenize("1 < 0x01")
     assert_equal %w(~~NUMLITERAL << ~~HEXLITERAL), tokenize("1 << 0x01")
+    assert_equal %w(~~NUMLITERAL <<< ~~HEXLITERAL), tokenize("1 <<< 0x01")
+    assert_equal %w(foo <<= ~~HEXLITERAL), tokenize("foo <<= 0x01")
+    assert_equal %w(foo >>= ~~HEXLITERAL), tokenize("foo >>= 0x01")
+    assert_equal %w(foo *= ~~HEXLITERAL), tokenize("foo *= 0x01")
+    assert_equal %w(foo ^ ~~HEXLITERAL), tokenize("foo ^ 0x01")
+    assert_equal %w(foo ^= ~~HEXLITERAL), tokenize("foo ^= 0x01")
+    assert_equal %w(foo == bar), tokenize("foo == bar")
+    assert_equal %w(foo === bar), tokenize("foo === bar")
+
   end
 
   def test_c_tokens
@@ -77,14 +90,14 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_cpp_tokens
-    assert_equal %w(class Bar { protected char *name ; public void hello \( \) ; }), tokenize(:"C++/bar.h")
+    assert_equal %w(class Bar { protected char * name ; public void hello \( \) ; }), tokenize(:"C++/bar.h")
     assert_equal %w(#include <iostream> using namespace std ; int main \( \) { cout << " " << endl ; }), tokenize(:"C++/hello.cpp")
   end
 
   def test_objective_c_tokens
     assert_equal %w(#import <Foundation/Foundation.h> @interface Foo NSObject { } @end), tokenize(:"Objective-C/Foo.h")
     assert_equal %w(#import " " @implementation Foo @end), tokenize(:"Objective-C/Foo.m")
-    assert_equal %w(#import <Cocoa/Cocoa.h> int main \( int argc char *argv [ ] \) { NSLog \( @ " " \) ; return ~~NUMLITERAL ; }), tokenize(:"Objective-C/hello.m")
+    assert_equal %w(#import <Cocoa/Cocoa.h> int main \( int argc char * argv [ ] \) { NSLog \( @ " " \) ; return ~~NUMLITERAL ; }), tokenize(:"Objective-C/hello.m")
   end
 
   def test_shebang
