@@ -21,13 +21,13 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_skip_number_literals
-    assert_equal %w(+), tokenize('1 + 1')
-    assert_equal %w(add \( \)), tokenize('add(123, 456)')
-    assert_equal %w(|), tokenize('0x01 | 0x10')
-    assert_equal %w(*), tokenize('500.42 * 1.0')
-    assert_equal %w(), tokenize('1.23e-04')
-    assert_equal %w(), tokenize('1.0f')
-    assert_equal %w(), tokenize('1234ULL')
+    assert_equal %w(~~NUMLITERAL + ~~NUMLITERAL), tokenize('1 + 1')
+    assert_equal %w(add \( ~~NUMLITERAL ~~NUMLITERAL \)), tokenize('add(123, 456)')
+    assert_equal %w(~~HEXLITERAL | ~~HEXLITERAL), tokenize('0x01 | 0x10')
+    assert_equal %w(~~NUMLITERAL * ~~NUMLITERAL), tokenize('500.42 * 1.0')
+    assert_equal %w(~~NUMLITERAL), tokenize('1.23e-04')
+    assert_equal %w(~~NUMLITERAL), tokenize('1.0f')
+    assert_equal %w(~~NUMLITERAL), tokenize('1234ULL')
     assert_equal %w(G1 X55 Y5 F2000), tokenize('G1 X55 Y5 F2000')
   end
 
@@ -42,7 +42,7 @@ class TestTokenizer < Minitest::Test
     assert_equal %w(foo <!-- -->), tokenize("foo <!-- Comment -->")
     assert_equal %w(foo {- -}), tokenize("foo {- Comment -}")
     assert_equal %w(foo \(* *\)), tokenize("foo (* Comment *)")
-    assert_equal %w(% %), tokenize("2 % 10\n% Comment")
+    assert_equal %w(~~NUMLITERAL % ~~NUMLITERAL %), tokenize("2 % 10\n% Comment")
     assert_equal %w(foo """ """ bar), tokenize("foo\n\"\"\"\nComment\n\"\"\"\nbar")
     assert_equal %w(foo ''' ''' bar), tokenize("foo\n'''\nComment\n'''\nbar")
   end
@@ -58,22 +58,22 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_operators
-    assert_equal %w(+), tokenize("1 + 1")
-    assert_equal %w(-), tokenize("1 - 1")
-    assert_equal %w(*), tokenize("1 * 1")
-    assert_equal %w(/), tokenize("1 / 1")
-    assert_equal %w(%), tokenize("2 % 5")
-    assert_equal %w(&), tokenize("1 & 1")
-    assert_equal %w(&&), tokenize("1 && 1")
-    assert_equal %w(|), tokenize("1 | 1")
-    assert_equal %w(||), tokenize("1 || 1")
-    assert_equal %w(<), tokenize("1 < 0x01")
-    assert_equal %w(<<), tokenize("1 << 0x01")
+    assert_equal %w(~~NUMLITERAL + ~~NUMLITERAL), tokenize("1 + 1")
+    assert_equal %w(~~NUMLITERAL - ~~NUMLITERAL), tokenize("1 - 1")
+    assert_equal %w(~~NUMLITERAL * ~~NUMLITERAL), tokenize("1 * 1")
+    assert_equal %w(~~NUMLITERAL / ~~NUMLITERAL), tokenize("1 / 1")
+    assert_equal %w(~~NUMLITERAL % ~~NUMLITERAL), tokenize("2 % 5")
+    assert_equal %w(~~NUMLITERAL & ~~NUMLITERAL), tokenize("1 & 1")
+    assert_equal %w(~~NUMLITERAL && ~~NUMLITERAL), tokenize("1 && 1")
+    assert_equal %w(~~NUMLITERAL | ~~NUMLITERAL), tokenize("1 | 1")
+    assert_equal %w(~~NUMLITERAL || ~~NUMLITERAL), tokenize("1 || 1")
+    assert_equal %w(~~NUMLITERAL < ~~HEXLITERAL), tokenize("1 < 0x01")
+    assert_equal %w(~~NUMLITERAL << ~~HEXLITERAL), tokenize("1 << 0x01")
   end
 
   def test_c_tokens
     assert_equal %w(#ifndef HELLO_H #define HELLO_H void hello \( \) ; #endif), tokenize(:"C/hello.h")
-    assert_equal %w(#include <stdio.h> int main \( \) { printf \( " " \) ; return ; }), tokenize(:"C/hello.c")
+    assert_equal %w(#include <stdio.h> int main \( \) { printf \( " " \) ; return ~~NUMLITERAL ; }), tokenize(:"C/hello.c")
   end
 
   def test_cpp_tokens
@@ -84,20 +84,20 @@ class TestTokenizer < Minitest::Test
   def test_objective_c_tokens
     assert_equal %w(#import <Foundation/Foundation.h> @interface Foo NSObject { } @end), tokenize(:"Objective-C/Foo.h")
     assert_equal %w(#import " " @implementation Foo @end), tokenize(:"Objective-C/Foo.m")
-    assert_equal %w(#import <Cocoa/Cocoa.h> int main \( int argc char *argv [ ] \) { NSLog \( @ " " \) ; return ; }), tokenize(:"Objective-C/hello.m")
+    assert_equal %w(#import <Cocoa/Cocoa.h> int main \( int argc char *argv [ ] \) { NSLog \( @ " " \) ; return ~~NUMLITERAL ; }), tokenize(:"Objective-C/hello.m")
   end
 
   def test_shebang
-    assert_equal "SHEBANG#!sh", tokenize(:"Shell/sh")[0]
-    assert_equal "SHEBANG#!bash", tokenize(:"Shell/bash")[0]
-    assert_equal "SHEBANG#!zsh", tokenize(:"Shell/zsh")[0]
-    assert_equal "SHEBANG#!perl", tokenize(:"Perl/perl")[0]
-    assert_equal "SHEBANG#!python", tokenize(:"Python/python")[0]
-    assert_equal "SHEBANG#!ruby", tokenize(:"Ruby/ruby")[0]
-    assert_equal "SHEBANG#!ruby", tokenize(:"Ruby/ruby2")[0]
-    assert_equal "SHEBANG#!node", tokenize(:"JavaScript/js")[0]
-    assert_equal "SHEBANG#!php", tokenize(:"PHP/php")[0]
-    assert_equal "SHEBANG#!escript", tokenize(:"Erlang/factorial")[0]
+    assert_equal "~~SHEBANG#!sh", tokenize(:"Shell/sh")[0]
+    assert_equal "~~SHEBANG#!bash", tokenize(:"Shell/bash")[0]
+    assert_equal "~~SHEBANG#!zsh", tokenize(:"Shell/zsh")[0]
+    assert_equal "~~SHEBANG#!perl", tokenize(:"Perl/perl")[0]
+    assert_equal "~~SHEBANG#!python", tokenize(:"Python/python")[0]
+    assert_equal "~~SHEBANG#!ruby", tokenize(:"Ruby/ruby")[0]
+    assert_equal "~~SHEBANG#!ruby", tokenize(:"Ruby/ruby2")[0]
+    assert_equal "~~SHEBANG#!node", tokenize(:"JavaScript/js")[0]
+    assert_equal "~~SHEBANG#!php", tokenize(:"PHP/php")[0]
+    assert_equal "~~SHEBANG#!escript", tokenize(:"Erlang/factorial")[0]
     assert_equal "echo", tokenize(:"Shell/invalid-shebang.sh")[0]
   end
 
@@ -106,7 +106,7 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_json_tokens
-    assert_equal %w( { " " " " " " " " " " [ " " " " ] " " { " " " " } } ), tokenize(:"JSON/product.json")
+    assert_equal %w( { " " ~~NUMLITERAL " " " " " " ~~NUMLITERAL " " [ " " " " ] " " { " " ~~NUMLITERAL " " ~~NUMLITERAL } } ), tokenize(:"JSON/product.json")
   end
 
   def test_ruby_tokens

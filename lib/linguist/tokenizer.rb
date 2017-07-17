@@ -66,7 +66,7 @@ module Linguist
 
         if token = s.scan(/^#!.+$/)
           if name = extract_shebang(token)
-            tokens << "SHEBANG#!#{name}"
+            tokens << "~~SHEBANG#!#{name}"
           end
 
         # Single line comment
@@ -99,8 +99,11 @@ module Linguist
           tokens << "'"
           tokens << "'"
 
-        # Skip number literals
-        elsif s.scan(/(0x\h(\h|\.)*|\d(\d|\.)*)([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)/)
+        # Normalize number literals
+        elsif s.scan(/0x\h+([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)/)
+          tokens << "~~HEXLITERAL"
+        elsif s.scan(/\d(\d|\.)*([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)/)
+          tokens << "~~NUMLITERAL"
 
         # SGML style brackets
         elsif token = s.scan(/<[^\s<>][^<>]*>/)
