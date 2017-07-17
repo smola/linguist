@@ -3215,6 +3215,7 @@ Perl:
   - ".plx"
   - ".pm"
   - ".pod"
+  - ".pp"
   - ".psgi"
   - ".t"
   filenames:
