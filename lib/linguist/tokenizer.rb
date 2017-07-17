@@ -71,7 +71,7 @@ module Linguist
 
         # Single line comment
         elsif s.beginning_of_line? && token = s.scan(START_SINGLE_LINE_COMMENT)
-          # tokens << token.strip
+          tokens << token.strip
           s.skip_until(/\n|\Z/)
 
         # Multiline comments
