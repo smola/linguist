@@ -360,6 +360,16 @@ module Linguist
       end
     end
 
+    disambiguate ".pp" do |data|
+      if /^\s*(?:use\s+v6\s*;|\bmodule\b|\bmy\s+class\b)/.match(data)
+        Language["Perl 6"]
+      elsif /\buse\s+(?:strict\b|v?5\.)/.match(data)
+        Language["Perl"]
+      elsif /^(?:include|class)\s+[a-z][a-z0-9_]*(?:::[a-z][a-z0-9_]*)*/.match(data)
+        Language["Puppet"]
+      end
+    end
+
     disambiguate ".pro" do |data|
       if /^[^#]+:-/.match(data)
         Language["Prolog"]
