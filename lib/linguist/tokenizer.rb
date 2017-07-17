@@ -71,8 +71,13 @@ module Linguist
 
         # Single line comment
         elsif s.beginning_of_line? && token = s.scan(START_SINGLE_LINE_COMMENT)
-          tokens << token.strip
-          s.skip_until(/\n|\Z/)
+          token = token.strip
+          tokens << token
+          if comment = s.scan_until(/\n|\Z/)
+            extract_tokens(comment).each do |in_comment|
+              tokens << "~~INCOMMENT~" + token + '~' + in_comment
+            end
+          end
 
         # Multiline comments
         elsif token = s.scan(START_MULTI_LINE_COMMENT)
