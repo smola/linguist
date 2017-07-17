@@ -98,10 +98,11 @@ class TestClassifier < Minitest::Test
       Dir.foreach(lang_dir) { |file|
         next if file.start_with? '.'
         file_path = File.join(lang_dir, file)
-        candidates = Language.find_by_extension(file)
+        #candidates = Language.find_by_extension(file)
+        candidates = Linguist::Language.all
         results = Classifier.call(FileBlob.new(file_path), candidates)
         if expected_language != results.first
-          STDERR.puts "Need more samples for #{expected_language}, failed with #{file_path} #{results.inspect}"
+          STDERR.puts "Need more samples for #{expected_language}, failed with #{file_path} #{results.first}"
         end
         #assert_equal language.name, results.first[0], "#{sample[:path]}\n#{results.inspect}"
       }
