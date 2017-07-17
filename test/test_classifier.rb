@@ -44,7 +44,6 @@ class TestClassifier < Minitest::Test
   end
 
   def test_classify_xvalidation
-    return
     samples = []
     data = {}
     samples_per_lang = {}
@@ -71,10 +70,16 @@ class TestClassifier < Minitest::Test
       languages = Language.find_by_extension(sample[:path]).map(&:name)
       next unless languages.length > 1
 
-      STDERR.puts "Testing #{path}"
+      #STDERR.puts "Testing #{path}"
       db = {}
       samples.each do |training_sample|
         if sample[:path] == training_sample[:path]
+          next
+        end
+        # FIXME: We skip samples that are not candidate languages.
+        # Note that the resulting classifier is not completely equivalent, since
+        # probability of unseen tokens changes.
+        if not languages.include? training_sample[:language]
           next
         end
         Classifier.train!(db, training_sample[:language], data[training_sample[:path]])
