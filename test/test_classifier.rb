@@ -43,7 +43,8 @@ class TestClassifier < Minitest::Test
     assert_equal [], Classifier.classify(Samples.cache, nil)
   end
 
-  def test_classify_ambiguous_languages
+  def test_classify_xvalidation
+    return
     samples = []
     data = {}
     samples_per_lang = {}
@@ -86,6 +87,25 @@ class TestClassifier < Minitest::Test
       end
       #assert_equal language.name, results.first[0], "#{sample[:path]}\n#{results.inspect}"
     end
+  end
+
+  def test_classify_test_samples
+    test_dir = 'test_samples'
+    Dir.foreach(test_dir) { |lang|
+      next if lang.start_with? '.'
+      expected_language  = Linguist::Language.find_by_name(lang)
+      lang_dir = File.join(test_dir, lang)
+      Dir.foreach(lang_dir) { |file|
+        next if file.start_with? '.'
+        file_path = File.join(lang_dir, file)
+        candidates = Language.find_by_extension(file)
+        results = Classifier.call(FileBlob.new(file_path), candidates)
+        if expected_language != results.first
+          STDERR.puts "Need more samples for #{expected_language}, failed with #{file_path} #{results.inspect}"
+        end
+        #assert_equal language.name, results.first[0], "#{sample[:path]}\n#{results.inspect}"
+      }
+    }
   end
 
   def test_classify_empty_languages
