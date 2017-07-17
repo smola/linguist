@@ -3,7 +3,7 @@
 require 'github_api'
 require 'base64'
 
-samples_dir = 'more_samples'
+samples_dir = 'test_samples'
 if not Dir::exists? samples_dir
   Dir::mkdir(samples_dir)
 end
