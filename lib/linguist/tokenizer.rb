@@ -76,10 +76,10 @@ module Linguist
 
         # Multiline comments
         elsif token = s.scan(START_MULTI_LINE_COMMENT)
-          # tokens << token
+          tokens << token
           close_token = MULTI_LINE_COMMENTS.assoc(token)[1]
           s.skip_until(Regexp.compile(Regexp.escape(close_token)))
-          # tokens << close_token
+          tokens << close_token
 
         # Skip single or double quoted strings
         elsif s.scan(/"/)

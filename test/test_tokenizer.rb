@@ -37,14 +37,14 @@ class TestTokenizer < Minitest::Test
     assert_equal %w(foo), tokenize("foo\n// Comment")
     assert_equal %w(foo), tokenize("foo\n-- Comment")
     assert_equal %w(foo), tokenize("foo\n\" Comment")
-    assert_equal %w(foo), tokenize("foo /* Comment */")
-    assert_equal %w(foo), tokenize("foo /* \nComment\n */")
-    assert_equal %w(foo), tokenize("foo <!-- Comment -->")
-    assert_equal %w(foo), tokenize("foo {- Comment -}")
-    assert_equal %w(foo), tokenize("foo (* Comment *)")
+    assert_equal %w(foo /* */), tokenize("foo /* Comment */")
+    assert_equal %w(foo /* */), tokenize("foo /* \nComment\n */")
+    assert_equal %w(foo <!-- -->), tokenize("foo <!-- Comment -->")
+    assert_equal %w(foo {- -}), tokenize("foo {- Comment -}")
+    assert_equal %w(foo \(* *\)), tokenize("foo (* Comment *)")
     assert_equal %w(%), tokenize("2 % 10\n% Comment")
-    assert_equal %w(foo bar), tokenize("foo\n\"\"\"\nComment\n\"\"\"\nbar")
-    assert_equal %w(foo bar), tokenize("foo\n'''\nComment\n'''\nbar")
+    assert_equal %w(foo """ """ bar), tokenize("foo\n\"\"\"\nComment\n\"\"\"\nbar")
+    assert_equal %w(foo ''' ''' bar), tokenize("foo\n'''\nComment\n'''\nbar")
   end
 
   def test_sgml_tags
