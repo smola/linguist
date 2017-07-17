@@ -14,8 +14,11 @@ gh = Github.new oauth_token: token #, auto_pagination: true
 language_queries = {
     'C' => ['language:C include'],
     'C++' => ['language:C++ include'],
+    # https://github.com/github/linguist/issues/3605
     'Puppet' => ['language:Puppet extension:pp class', 'language:Pascal extension:pp include'],
-    'Pascal' => ['language:Pascal extension:pp begin']
+    'Pascal' => ['language:Pascal extension:pp begin'],
+    # https://github.com/github/linguist/issues/3699
+    'Perl' => ['extension:pp -language:Puppet pdl NOT begin']
 }
 
 repo_blacklist = %w[
@@ -23,6 +26,7 @@ repo_blacklist = %w[
     stijn-volckaert/ReMon-clang
     yuzhoujr/C-Primmer
     j316chuck/Competitive-Programming
+    Three-DS/FPC-2.2.2
 ]
 
 language_queries.each { |lang, queries|
