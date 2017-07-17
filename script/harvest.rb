@@ -9,7 +9,7 @@ if not Dir::exists? samples_dir
 end
 
 token = ENV['GITHUB_TOKEN']
-gh = Github.new oauth_token: token #, auto_pagination: true
+gh = Github.new oauth_token: token, auto_pagination: true
 
 language_queries = {
     'C' => ['language:C include'],
