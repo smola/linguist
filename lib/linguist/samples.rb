@@ -12,7 +12,7 @@ module Linguist
   # Model for accessing classifier training data.
   module Samples
     # Path to samples root directory
-    ROOT = File.expand_path("../../../more_samples", __FILE__)
+    ROOT = File.expand_path("../../../samples", __FILE__)
 
     # Path for serialized samples db
     PATH = File.expand_path('../samples.json', __FILE__)
