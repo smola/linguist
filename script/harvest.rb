@@ -14,6 +14,8 @@ gh = Github.new oauth_token: token, auto_pagination: true
 language_queries = {
     'C' => ['language:C include'],
     'C++' => ['language:C++ include'],
+    'Genie' => ['language:Genie def'],
+    'Gosu' => ['language:Gosu package'],
     # https://github.com/github/linguist/issues/3605
     'Puppet' => ['language:Puppet extension:pp class', 'language:Pascal extension:pp include'],
     'Pascal' => ['language:Pascal extension:pp begin'],
