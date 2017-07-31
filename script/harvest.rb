@@ -21,7 +21,8 @@ language_queries = {
     'Pascal' => ['language:Pascal extension:pp begin'],
     # https://github.com/github/linguist/issues/3699
     'Perl' => ['extension:pp -language:Puppet pdl NOT begin', 'extension:pl language:Perl use strict'],
-    'Reason' => ['language:Reason let']
+    'Reason' => ['language:Reason let'],
+    'GLSL' => ['extension:gs void main version']
 }
 
 repo_blacklist = %w[
