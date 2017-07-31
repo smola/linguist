@@ -119,7 +119,7 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_json_tokens
-    assert_equal %w( { " ~~IN~"~id " ~~NUMLITERAL " " " " " " ~~NUMLITERAL " " [ " " " " ] " " { " " ~~NUMLITERAL " " ~~NUMLITERAL } } ), tokenize(:"JSON/product.json")
+    assert_equal %w( { " ~~IN~"~id " ~~NUMLITERAL " ~~IN~"~name " " ~~IN~"~Foo " " ~~IN~"~price " ~~NUMLITERAL " ~~IN~"~tags " [ " ~~IN~"~Bar " " ~~IN~"~Eek " ] " ~~IN~"~stock " { " ~~IN~"~warehouse " ~~NUMLITERAL " ~~IN~"~retail " ~~NUMLITERAL } } ), tokenize(:"JSON/product.json")
   end
 
   def test_ruby_tokens

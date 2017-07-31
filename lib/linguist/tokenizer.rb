@@ -25,7 +25,7 @@ module Linguist
       '--', # Ada, Haskell, AppleScript
       '#',  # Ruby
       '%',  # Tex
-      '"',  # Vim
+      #'"',  # Vim
     ]
 
     # Start state on opening token, ignore anything until the closing
@@ -81,6 +81,42 @@ module Linguist
           end
           tokens << close_token
 
+        # Skip single or double quoted strings
+        elsif s.scan(/"/)
+          token = "\""
+          tokens << token
+          if s.peek(1) == token
+            s.getch
+            tokens << token
+          else
+            if string = s.scan_until(/(?<!\\)(?:\Z|\n|")/)
+              inner_string = string.chomp("\"").gsub(/\\"/, "\"")
+              extract_tokens(inner_string).each do |in_string|
+                tokens << "~~IN~#{token}~#{in_string}"
+              end
+              if string.end_with? token
+                tokens << token
+              end
+            end
+          end
+        elsif s.scan(/'/)
+          token = "'"
+          tokens << token
+          if s.peek(1) == token
+            s.getch
+            tokens << token
+          else
+            if string = s.scan_until(/(?<!\\)(?:\Z|\n|')/)
+              inner_string = string.chomp("'").gsub(/\\'/, "'")
+              extract_tokens(inner_string).each do |in_string|
+                tokens << "~~IN~#{token}~#{in_string}"
+              end
+              if string.end_with? token
+                tokens << token
+              end
+            end
+          end
+
         # Single line comment
         elsif s.beginning_of_line? && token = s.scan(START_SINGLE_LINE_COMMENT)
           token = token.strip
@@ -90,36 +126,6 @@ module Linguist
               tokens << "~~IN~#{token}~#{in_comment}"
             end
           end
-
-        # Skip single or double quoted strings
-        elsif s.scan(/"/)
-          token = "\""
-          tokens << token
-          if s.peek(1) == token
-            s.getch
-          else
-            if string = s.scan_until(/(?<!\\)"/)
-              string = string.chomp("\"").gsub(/\\"/, "\"")
-              extract_tokens(string).each do |in_string|
-                tokens << "~~IN~#{token}~#{in_string}"
-              end
-            end
-          end
-          tokens << token
-        elsif s.scan(/'/)
-          token = "'"
-          tokens << token
-          if s.peek(1) == token
-            s.getch
-          else
-            if string = s.scan_until(/(?<!\\)'/)
-              string = string.chomp("'").gsub(/\\'/, "'")
-              extract_tokens(string).each do |in_string|
-                tokens << "~~IN~#{token}~#{in_string}"
-              end
-            end
-          end
-          tokens << token
 
         # Normalize number literals
         elsif s.scan(/0x\h+([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)/)
