@@ -40,7 +40,7 @@ module Linguist
     ]
 
     START_SINGLE_LINE_COMMENT =  Regexp.compile(SINGLE_LINE_COMMENTS.map { |c|
-      "\s*#{Regexp.escape(c)} "
+      "\s*#{Regexp.escape(c)}"
     }.join("|"))
 
     START_MULTI_LINE_COMMENT =  Regexp.compile(MULTI_LINE_COMMENTS.map { |c|
@@ -69,40 +69,57 @@ module Linguist
             tokens << "~~SHEBANG#!#{name}"
           end
 
+        # Multiline comments
+        elsif token = s.scan(START_MULTI_LINE_COMMENT)
+          tokens << token
+          close_token = MULTI_LINE_COMMENTS.assoc(token)[1]
+          if comment = s.scan_until(Regexp.compile(Regexp.escape(close_token)))
+            comment = comment.chomp(close_token)
+            extract_tokens(comment).each do |in_comment|
+              tokens << "~~IN~#{token}~#{in_comment}"
+            end
+          end
+          tokens << close_token
+
         # Single line comment
         elsif s.beginning_of_line? && token = s.scan(START_SINGLE_LINE_COMMENT)
           token = token.strip
           tokens << token
           if comment = s.scan_until(/\n|\Z/)
             extract_tokens(comment).each do |in_comment|
-              tokens << "~~INCOMMENT~" + token + '~' + in_comment
+              tokens << "~~IN~#{token}~#{in_comment}"
             end
           end
 
-        # Multiline comments
-        elsif token = s.scan(START_MULTI_LINE_COMMENT)
-          tokens << token
-          close_token = MULTI_LINE_COMMENTS.assoc(token)[1]
-          s.skip_until(Regexp.compile(Regexp.escape(close_token)))
-          tokens << close_token
-
         # Skip single or double quoted strings
         elsif s.scan(/"/)
-          if s.peek(1) == "\""
+          token = "\""
+          tokens << token
+          if s.peek(1) == token
             s.getch
           else
-            s.skip_until(/(?<!\\)"/)
+            if string = s.scan_until(/(?<!\\)"/)
+              string = string.chomp("\"").gsub(/\\"/, "\"")
+              extract_tokens(string).each do |in_string|
+                tokens << "~~IN~#{token}~#{in_string}"
+              end
+            end
           end
-          tokens << "\""
-          tokens << "\""
+          tokens << token
         elsif s.scan(/'/)
-          if s.peek(1) == "'"
+          token = "'"
+          tokens << token
+          if s.peek(1) == token
             s.getch
           else
-            s.skip_until(/(?<!\\)'/)
+            if string = s.scan_until(/(?<!\\)'/)
+              string = string.chomp("'").gsub(/\\'/, "'")
+              extract_tokens(string).each do |in_string|
+                tokens << "~~IN~#{token}~#{in_string}"
+              end
+            end
           end
-          tokens << "'"
-          tokens << "'"
+          tokens << token
 
         # Normalize number literals
         elsif s.scan(/0x\h+([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)/)
