@@ -213,6 +213,30 @@ disambiguations:
     - '(?<!\S)\.(include|globa?l)\s'
     #TODO:  || /(?<!\/\*)(\A|\n)\s*\.[A-Za-z][_A-Za-z0-9]*:/.match(data.gsub(/"([^\\"]|\\.)*"|'([^\\']|\\.)*'|\\\s*(?:--.*)?\n/, ""))
   - language: MAXScript
+- extensions: ['.n']
+  rules:
+  - language: Roff
+    pattern: '^[.'']'
+  - language: Nemerle
+    pattern: '^(module|namespace|using)\s'
+- extensions: ['.ncl']
+  rules:
+  - language: Text
+    pattern: 'THE_TITLE'
+- extensions: ['.nl']
+  rules:
+  - language: NL
+    pattern: '^(b|g)[0-9]+ '
+  - language: NewLisp
+- extensions: ['.php']
+  rules:
+  - language: Hack
+    pattern: '<\?hh'
+  - language: PHP
+    #TODO: this was actually wrong in the original heuristics.rb
+    pattern: '<\?[^h]'
+
+
 named_patterns:
   cpp:
   - '^\s*#\s*include <(cstdint|string|vector|map|list|array|bitset|queue|stack|forward_list|unordered_map|unordered_set|(i|o|io)stream)>'
