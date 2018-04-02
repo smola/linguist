@@ -1,0 +1,152 @@
+# A collection of simple regexp-based rules that can be applied to content
+# to disambiguate languages with the same file extension.
+#
+# There two top-level keys: disambiguations and named_patterns.
+#
+# disambiguations     - a list of disambiguation rules, one for each
+#                       extension or group of extensions.
+# extensions          - an array of file extensions that this block applies to.
+# rules               - list of rules that are applied in order to the content
+#                       of a file with matching extension. Rules are evaluated
+#                       until one of them matches. If none matches, no language
+#                       is returned.
+# language            - Language to be returned if the rule matches.
+# pattern             - Ruby-compatible regular expression that makes the rule
+#                       match. If no pattern is specified, the rule always match.
+#                       Pattern can be a string with a single regular expression
+#                       or an array of strings that will be merged in a single
+#                       regular expression (with union).
+# named_pattern       - A pattern can be reused by specifying it in the
+#                       named_patterns section and referencing it here by its
+#                       key.
+# named_patterns      - Key-value map of reusable named patterns.
+#
+# Please keep this list alphabetized.
+#
+---
+disambiguations:
+- extensions: ['.as']
+  rules:
+  - language: ActionScript
+    pattern: '^\s*(package\s+[a-z0-9_\.]+|import\s+[a-zA-Z0-9_\.]+;|class\s+[A-Za-z0-9_]+\s+extends\s+[A-Za-z0-9_]+)'
+  - language: AngelScript
+- extensions: ['.asc']
+  rules:
+  - language: Public Key
+    pattern: '^(----[- ]BEGIN|ssh-(rsa|dss)) '
+  - language: AsciiDoc
+    pattern: '^[=-]+(\s|\n)|{{[A-Za-z]'
+  - language: AGS Script
+    pattern: '^(\/\/.+|((import|export)\s+)?(function|int|float|char)\s+((room|repeatedly|on|game)_)?([A-Za-z]+[A-Za-z_0-9]+)\s*[;\(])'
+- extensions: ['.bb']
+  rules:
+  - language: BlitzBasic
+    pattern: '(<^\s*; |End Function)'
+  - language: BitBake
+    pattern: '^\s*(# |include|require)\b'
+- extensions: ['.builds']
+  rules:
+  - language: XML
+    pattern: '^(\s*)(?i:<Project|<Import|<Property|<?xml|xmlns)'
+  - language: Text
+- extensions: ['.ch']
+  rules:
+  - language: xBase
+    pattern: '^\s*#\s*(?i:if|ifdef|ifndef|define|command|xcommand|translate|xtranslate|include|pragma|undef)\b'
+- extensions: ['.cl']
+  rules:
+  - language: Common Lisp
+    pattern: '^\s*\((?i:defun|in-package|defpackage) '
+  - language: Cool
+    pattern: '^class'
+  - language: OpenCL
+    pattern: '\/\* |\/\/ |^\}'
+- extensions: ['.cls']
+  rules:
+  - language: TeX
+    pattern: '\\\w+{'
+- extensions: ['.cs']
+  rules:
+  - language: Smalltalk
+    pattern: '![\w\s]+methodsFor: '
+  - language: 'C#'
+    pattern: '^(\s*namespace\s*[\w\.]+\s*{|\s*\/\/)'
+- extensions: ['.d']
+  rules:
+  - language: D
+    # see http://dlang.org/spec/grammar
+    # ModuleDeclaration | ImportDeclaration | FuncDeclaration | unittest
+    pattern: '^module\s+[\w.]*\s*;|import\s+[\w\s,.:]*;|\w+\s+\w+\s*\(.*\)(?:\(.*\))?\s*{[^}]*}|unittest\s*(?:\(.*\))?\s*{[^}]*}'
+  - language: DTrace
+    # see http://dtrace.org/guide/chp-prog.html, http://dtrace.org/guide/chp-profile.html, http://dtrace.org/guide/chp-opt.html
+    pattern: '^(\w+:\w*:\w*:\w*|BEGIN|END|provider\s+|(tick|profile)-\w+\s+{[^}]*}|#pragma\s+D\s+(option|attributes|depends_on)\s|#pragma\s+ident\s)'
+  - language: Makefile
+    # path/target : dependency \
+    # target : \
+    #  : dependency
+    # path/file.ext1 : some/path/../file.ext2
+    pattern: '([\/\\].*:\s+.*\s\\$|: \\$|^ : |^[\w\s\/\\.]+\w+\.\w+\s*:\s+[\w\s\/\\.]+\w+\.\w+)'
+- extensions: ['.ecl']
+  rules:
+  - language: ECLiPSe
+    pattern: '^[^#]+:-'
+  - language: ECL
+    pattern: ':='
+- extensions: ['.es']
+  rules:
+  - language: Erlang
+    pattern: '^\s*(?:%%|main\s*\(.*?\)\s*->)'
+  - language: JavaScript
+    pattern: '(?m:\/\/|("|'')use strict\1|export\s+default\s|\/\*.*?\*\/)'
+- extensions: ['.f']
+  rules:
+  - language: Forth
+    pattern: '^: '
+  - language: Filebench WML
+    pattern: 'flowop'
+  - language: Fortran
+    named_pattern: fortran
+- extensions: ['.for']
+  rules:
+  - language: Forth
+    pattern: '^: '
+  - language: Fortran
+    named_pattern: fortran
+- extensions: ['.fr']
+  rules:
+  - language: Forth
+    pattern: '^(: |also |new-device|previous )'
+  - language: Frege
+    pattern: '^\s*(import|module|package|data|type) '
+  - language: Text
+- extensions: ['.fs']
+  rules:
+  - language: Forth
+    pattern: '^(: |new-device)'
+  - language: 'F#'
+    pattern: '^\s*(#light|import|let|module|namespace|open|type)'
+  - language: GLSL
+    pattern: '^\s*(#version|precision|uniform|varying|vec[234])'
+  - language: Filterscript
+    pattern: '#include|#pragma\s+(rs|version)|__attribute__'
+- extensions: ['.gs']
+  rules:
+  - language: Gosu
+    pattern: '^uses java\.'
+- extensions: ['.h']
+  rules:
+  - language: Objective-C
+    named_pattern: objectivec
+  - language: C++
+    named_pattern: cpp
+named_patterns:
+  cpp:
+  - '^\s*#\s*include <(cstdint|string|vector|map|list|array|bitset|queue|stack|forward_list|unordered_map|unordered_set|(i|o|io)stream)>'
+  - '^\s*template\s*<'
+  - '^[ \t]*try'
+  - '^[ \t]*catch\s*\('
+  - '^[ \t]*(class|(using[ \t]+)?namespace)\s+\w+'
+  - '^[ \t]*(private|public|protected):$'
+  - 'std::\w+'
+  fortran: '^(?i:[c*][^abd-z]|      (subroutine|program|end|data)\s|\s*!)'
+  objectivec: '^\s*(@(interface|class|protocol|property|end|synchronised|selector|implementation)\b|#import\s+.+\.h[">])'

@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Linguist
   # A collection of simple heuristics that can be used to better analyze languages.
   class Heuristics
@@ -17,6 +19,7 @@ module Linguist
     # Returns an Array of languages, or empty if none matched or were inconclusive.
     def self.call(blob, candidates)
       return [] if blob.symlink?
+      self.load()
 
       data = blob.data[0...HEURISTICS_CONSIDER_BYTES]
 
@@ -27,6 +30,43 @@ module Linguist
       end
 
       [] # No heuristics matched
+    end
+
+    # Internal: Load heuristics from 'heuristics.yml'.
+    def self.load()
+      if @heuristics.any?
+        return
+      end
+
+      data = YAML.load_file(File.expand_path("../heuristics.yml", __FILE__))
+      named_patterns = data['named_patterns'].map { |k,v| [k, self.to_regex(v)] }.to_h
+
+      data['disambiguations'].each do |disambiguation|
+        exts = disambiguation['extensions']
+        rules = disambiguation['rules']
+        rules.map! do |rule|
+          if !rule['pattern'].nil?
+            rule['pattern'] = self.to_regex(rule['pattern'])
+          end
+          if !rule['named_pattern'].nil?
+            rule['pattern'] = named_patterns[rule['named_pattern']]
+          end
+          rule
+        end
+        @heuristics << new(exts, rules)
+      end
+    end
+
+    # Internal: Converts a string or array of strings to regexp
+    #
+    # str: string or array of strings. If it is an array of strings,
+    #      Regexp.union will be used.
+    def self.to_regex(str)
+      if str.kind_of?(Array)
+        Regexp.union(str.map { |s| Regexp.new(s) })
+      else
+        Regexp.new(str)
+      end
     end
 
     # Internal: Define a new heuristic.
@@ -46,16 +86,16 @@ module Linguist
     #     end
     #
     def self.disambiguate(*exts_and_langs, &heuristic)
-      @heuristics << new(exts_and_langs, &heuristic)
+      #TODO: @heuristics << new(exts_and_langs, &heuristic)
     end
 
     # Internal: Array of defined heuristics
     @heuristics = []
 
     # Internal
-    def initialize(exts_and_langs, &heuristic)
+    def initialize(exts_and_langs, rules)
       @exts_and_langs, @candidates = exts_and_langs.partition {|e| e =~ /\A\./}
-      @heuristic = heuristic
+      @rules = rules
     end
 
     # Internal: Check if this heuristic matches the candidate filenames or
@@ -71,7 +111,15 @@ module Linguist
 
     # Internal: Perform the heuristic
     def call(data)
-      @heuristic.call(data)
+      puts " -> Call #{@exts_and_langs.join(',')} | #{@rules}" #DEBUG
+      matched = @rules.find do |rule|
+        m = !rule.key?('pattern') || rule['pattern'].match?(data)
+        puts " -> Match #{rule['language']}: #{m}" #DEBUG
+        m
+      end
+      if !matched.nil?
+        Language[matched['language']]
+      end
     end
 
     # Common heuristics
