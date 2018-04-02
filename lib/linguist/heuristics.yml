@@ -139,6 +139,80 @@ disambiguations:
     named_pattern: objectivec
   - language: C++
     named_pattern: cpp
+- extensions: ['.inc']
+  rules:
+  - language: PHP
+    pattern: '^<\?(?:php)?'
+  - language: POV-Ray SDL
+    pattern: '^\s*#(declare|local|macro|while)\s'
+- extensions: ['.l']
+  rules:
+  - language: Common Lisp
+    pattern: '\(def(un|macro)\s'
+  - language: Lex
+    pattern: '^(%[%{}]xs|<.*>)'
+  - language: Roff
+    pattern: '^\.[A-Za-z]{2}(\s|$)'
+  - language: PicoLisp
+    pattern: '^\((de|class|rel|code|data|must)\s'
+- extensions: ['.ls']
+  rules:
+  - language: LoomScript
+    pattern: '^\s*package\s*[\w\.\/\*\s]*\s*{'
+  - language: LiveScript
+- extensions: ['.lsp', '.lisp']
+  rules:
+  - language: Common Lisp
+    pattern: '^\s*\((?i:defun|in-package|defpackage) '
+  - language: NewLisp
+    pattern: '^\s*\(define '
+- extensions: ['.m']
+  rules:
+  - language: Objective-C
+    named_pattern: objectivec
+  - language: Mercury
+    pattern: ':- module'
+  - language: MUF
+    pattern: '^: '
+  - language: M
+    pattern: '^\s*;'
+  - language: Mathematica
+    pattern: '\*\)$'
+  - language: Matlab
+    pattern: '^\s*%'
+  - language: Limbo
+    pattern: '^\w+\s*:\s*module\s*{'
+- extensions: ['.md']
+  rules:
+  - language: Markdown
+    pattern:
+    - '(^[-A-Za-z0-9=#!\*\[|>])|<\/'
+    - '\A\z'
+  - language: GCC Machine Description
+    pattern: '^(;;|\(define_)'
+  - language: Markdown
+- extensions: ['.ml']
+  rules:
+  - language: OCaml
+    pattern: '(^\s*module)|let rec |match\s+(\S+\s)+with'
+  - language: Standard ML
+    pattern: '=> |case\s+(\S+\s)+of'
+- extensions: ['.mod']
+  rules:
+  - language: XML
+    pattern: '<!ENTITY '
+  - language: Modula-2
+    pattern: '^\s*(?i:MODULE|END) [\w\.]+;'
+  - language: [Linux Kernel Module, AMPL]
+- extensions: ['.ms']
+  rules:
+  - language: Roff
+    pattern: '^[.''][A-Za-z]{2}(\s|$)'
+  - language: Unix Assembly
+    pattern:
+    - '(?<!\S)\.(include|globa?l)\s'
+    #TODO:  || /(?<!\/\*)(\A|\n)\s*\.[A-Za-z][_A-Za-z0-9]*:/.match(data.gsub(/"([^\\"]|\\.)*"|'([^\\']|\\.)*'|\\\s*(?:--.*)?\n/, ""))
+  - language: MAXScript
 named_patterns:
   cpp:
   - '^\s*#\s*include <(cstdint|string|vector|map|list|array|bitset|queue|stack|forward_list|unordered_map|unordered_set|(i|o|io)stream)>'
@@ -150,3 +224,5 @@ named_patterns:
   - 'std::\w+'
   fortran: '^(?i:[c*][^abd-z]|      (subroutine|program|end|data)\s|\s*!)'
   objectivec: '^\s*(@(interface|class|protocol|property|end|synchronised|selector|implementation)\b|#import\s+.+\.h[">])'
+#TODO: add tests for missing heuristics
+#TODO: add support to return multiple languages
