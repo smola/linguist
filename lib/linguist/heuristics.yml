@@ -235,7 +235,135 @@ disambiguations:
   - language: PHP
     #TODO: this was actually wrong in the original heuristics.rb
     pattern: '<\?[^h]'
-
+- extensions: ['.pl']
+  rules:
+  - language: Prolog
+    pattern: '^[^#]*:-'
+  - language: Perl
+    named_pattern: perl5
+  - language: Perl 6
+    named_pattern: perl6
+- extensions: ['.pm']
+  rules:
+  - language: Perl
+    named_pattern: perl5
+  - language: Perl 6
+    named_pattern: perl6
+  - language: XPM
+    pattern: '^\s*\/\* XPM \*\/'
+- extensions: ['.pro']
+  rules:
+  - language: Prolog
+    pattern: '^[^\[#]+:-'
+  - language: INI
+    pattern: 'last_client='
+  - language: QMake
+    pattern: '(HEADERS|SOURCES)'
+  - language: IDL
+    pattern: '^\s*function[ \w,]+$'
+- extensions: ['.props']
+  rules:
+  - language: XML
+    pattern: '^(\s*)(?i:<Project|<Import|<Property|<?xml|xmlns)'
+  - language: INI
+    pattern: '(?i:\w+\s*=\s*)'
+- extensions: ['.q']
+  rules:
+  - language: q
+    pattern: '((?i:[A-Z.][\w.]*:{)|(^|\n)\\(cd?|d|l|p|ts?) )'
+  - language: HiveQL
+    pattern: '(?i:SELECT\s+[\w*,]+\s+FROM|(CREATE|ALTER|DROP)\s(DATABASE|SCHEMA|TABLE))'
+- extensions: ['.r']
+  rules:
+  - language: Rebol
+    pattern: '(?i:\bRebol\b)'
+  - language: R
+    pattern: '<-|^\s*#'
+- extensions: ['.rno']
+  rules:
+  - language: RUNOFF
+    pattern: '(?i:^\.!|^\.end lit(?:eral)?\b)'
+  - language: Roff
+    pattern: '^\.\\" '
+- extensions: ['.rpy']
+  rules:
+  - language: Python
+    pattern: '(?m:^(import|from|class|def)\s)'
+  - language: "Ren'Py"
+- extensions: ['.rs']
+  rules:
+  - language: Rust
+    pattern: '^(use |fn |mod |pub |macro_rules|impl|#!?\[)'
+  - language: RenderScript
+    pattern: '#include|#pragma\s+(rs|version)|__attribute__'
+- extensions: ['.sc']
+  rules:
+  - language: SuperCollider
+    pattern: '(?i:\^(this|super)\.|^\s*~\w+\s*=\.)'
+  - language: Scala
+    pattern: '(^\s*import (scala|java)\.|^\s*class\b)'
+- extensions: ['.sql']
+  # Postgre
+  - language: PLpgSQL
+    pattern: '(?i:^\\i\b|AS \$\$|LANGUAGE '?plpgsql'?|SECURITY (DEFINER|INVOKER)|BEGIN( WORK| TRANSACTION)?;)'
+  # IBM db2
+  - language: SQLPL
+    pattern: "(?i:(alter module)|(language sql)|(begin( NOT)+ atomic)|signal SQLSTATE '[0-9]+')"
+  # Oracle
+  - language: PLSQL
+    pattern: '(?i:\$\$PLSQL_|XMLTYPE|sysdate|systimestamp|\.nextval|connect by|AUTHID (DEFINER|CURRENT_USER)|constructor\W+function)'
+  # Generic SQL
+  - language: SQL
+    negative_pattern: '(?i:begin|boolean|package|exception)'
+- extensions: ['.srt']
+  rules:
+  - language: SubRip Text
+    pattern: '^(\d{2}:\d{2}:\d{2},\d{3})\s*(-->)\s*(\d{2}:\d{2}:\d{2},\d{3})$'
+- extensions: ['.t']
+  rules:
+  - language: Perl
+    named_pattern: perl5
+  - language: Perl 6
+    named_pattern: perl6
+  - language: Turing
+    pattern: '^\s*%[ \t]+|^\s*var\s+\w+\s*:=\s*\w+'
+- extensions: ['.toc']
+  rules:
+  - language: World of Warcraft Addon Data
+    pattern: '^## |@no-lib-strip@'
+  - language: TeX
+    pattern: '^\\(contentsline|defcounter|beamer|boolfalse)'
+- extensions: ['.ts']
+  rules:
+  - language: XML
+    pattern: '<TS\b'
+  - language: TypeScript
+- extensions: ['.tst']
+  rules:
+  - language: GAP
+    pattern: 'gap> '
+  # Heads up - we don't usually write heuristics like this (with no regex match)
+  - language: Scilab
+- extensions: ['.tsx']
+  rules:
+  - language: TypeScript
+    pattern: '^\s*(import.+(from\s+|require\()[''"]react|\/\/\/\s*<reference\s)'
+  - language: XML
+    pattern: '(?i:^\s*<\?xml\s+version)'
+- extensions: ['.w']
+  rules:
+  - language: OpenEdge ABL
+    pattern: '&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS'
+  - language: CWeb
+    pattern: '^@(<|\w+\.)'
+- extensions: ['.x']
+  rules:
+  - language: RPC
+    pattern: '\b(program|version)\s+\w+\s*{|\bunion\s+\w+\s+switch\s*\('
+  - language: Logos
+    pattern: '^%(end|ctor|hook|group)\b'
+  - language: Linked Script
+    pattern: 'OUTPUT_ARCH\(|OUTPUT_FORMAT\(|SECTIONS'
 
 named_patterns:
   cpp:
@@ -248,5 +376,7 @@ named_patterns:
   - 'std::\w+'
   fortran: '^(?i:[c*][^abd-z]|      (subroutine|program|end|data)\s|\s*!)'
   objectivec: '^\s*(@(interface|class|protocol|property|end|synchronised|selector|implementation)\b|#import\s+.+\.h[">])'
+  perl5: '\buse\s+(?:strict\b|v?5\.)'
+  perl6: '^\s*(?:use\s+v6\b|\bmodule\b|\b(?:my\s+)?class\b)'
 #TODO: add tests for missing heuristics
 #TODO: add support to return multiple languages
