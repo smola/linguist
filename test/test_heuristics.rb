@@ -49,11 +49,14 @@ class TestHeuristics < Minitest::Test
     assert_equal Language["Objective-C"], match
   end
 
+  Heuristics.load
   Heuristics.instance_variable_get(:@heuristics).each do |h|
     h.instance_variable_get(:@exts_and_langs).each do |ext|
-      define_method("test_#{ext}_by_heuristics") do
-        langs = rules.map { |r| r["language"] }.uniq.sort
-        cases = langs.map { |l| [l, all_fixtures(l, ext)] }.to_h
+      define_method("test_#{ext.sub(".", "")}_by_heuristics") do
+        rules = h.instance_variable_get(:@rules)
+        langs = rules.map{ |r| r["language"] }.select{ |l| l.is_a? String }.uniq.sort
+        cases = langs.map{ |l| [l, all_fixtures(l, "*#{ext}")] }.to_h
+        assert(!cases.empty?)
         assert_heuristics(cases)
       end
     end
