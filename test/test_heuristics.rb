@@ -49,6 +49,16 @@ class TestHeuristics < Minitest::Test
     assert_equal Language["Objective-C"], match
   end
 
+  Heuristics.instance_variable_get(:@heuristics).each do |h|
+    h.instance_variable_get(:@exts_and_langs).each do |ext|
+      define_method("test_#{ext}_by_heuristics") do
+        langs = rules.map { |r| r["language"] }.uniq.sort
+        cases = langs.map { |l| [l, all_fixtures(l, ext)] }.to_h
+        assert_heuristics(cases)
+      end
+    end
+  end
+
   def test_as_by_heuristics
     assert_heuristics({
       "ActionScript" => all_fixtures("ActionScript", "*.as"),
