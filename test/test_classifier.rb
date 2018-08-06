@@ -52,7 +52,17 @@ class TestClassifier < Minitest::Test
       languages = Language.find_by_extension(sample[:path]).map(&:name)
       next if languages.length <= 1
 
-      results = Classifier.classify(Samples.cache, File.read(sample[:path]), languages)
+      db = {}
+      Samples.each do |training_sample|
+        next if training_sample[:path] == sample[:path]
+        Classifier.train! db, training_sample[:language], File.read(training_sample[:path])
+      end
+
+      languages.each do |lang|
+        assert db['languages'].has_key?(lang), "need at least one more sample for #{lang}"
+      end
+
+      results = Classifier.classify(db, File.read(sample[:path]), languages)
       assert_equal language.name, results.first[0], "#{sample[:path]}\n#{results.inspect}"
     end
   end
