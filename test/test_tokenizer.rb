@@ -8,6 +8,10 @@ class TestTokenizer < Minitest::Test
     Tokenizer.tokenize(data)
   end
 
+  def test_actionscript
+    assert_equal [""], tokenize(:"ActionScript/HelloWorld.as")
+  end
+
   def test_skip_string_literals
     assert_equal %w(print), tokenize('print ""')
     assert_equal %w(print), tokenize('print "Josh"')
