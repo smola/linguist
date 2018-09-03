@@ -45,13 +45,18 @@ class TestClassifier < Minitest::Test
 
   def test_classify_ambiguous_languages
     data_by_sample = Hash.new
-    tokens_by_sample = Hash.new
+    db_by_sample = Hash.new
+    full_db = Hash.new
     Samples.each do |sample|
+      #puts "Training #{sample[:path]}"
       path = sample[:path]
       data = File.read(path)
-      tokens = Tokenizer.tokenize(data)
       data_by_sample[path] = data
-      tokens_by_sample[path] = tokens
+      tokens = Tokenizer.tokenize(data)
+      db = {}
+      Classifier.train! db, sample[:language], tokens
+      Classifier.train! full_db, sample[:language], tokens
+      db_by_sample[path] = db
     end
 
     Samples.each do |sample|
@@ -63,11 +68,9 @@ class TestClassifier < Minitest::Test
       languages = Language.find_by_extension(sample[:path]).map(&:name)
       next if languages.length <= 1
 
-      db = {}
-      Samples.each do |training_sample|
-        next if training_sample[:path] == sample[:path]
-        Classifier.train! db, training_sample[:language], tokens_by_sample[training_sample[:path]]
-      end
+      #puts "Building classifier"
+      db = Classifier.substract(full_db, db_by_sample[sample[:path]])
+      #puts "Built classifier"
 
       notEnough = false
       languages.each do |lang|
