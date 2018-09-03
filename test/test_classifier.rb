@@ -55,10 +55,8 @@ class TestClassifier < Minitest::Test
     end
 
     Samples.each do |sample|
-      puts "Testing #{sample[:path]}"
+      #puts "Testing #{sample[:path]}"
       language  = Linguist::Language.find_by_name(sample[:language])
-      next if language.nil? #TODO
-      next if language.name < 'Charity' #TODO
       languages = Language.find_by_filename(sample[:path]).map(&:name)
       next if languages.length == 1
 

@@ -51,14 +51,22 @@ module Linguist
       db['language_tokens'] ||= {}
       db['languages'] ||= {}
 
+
+
+      db['tokens'][language] ||= {}
+      db_tokens = db['tokens'][language]
+
       tokens.each do |token|
-        db['tokens'][language] ||= {}
-        db['tokens'][language][token] ||= 0
-        db['tokens'][language][token] += 1
-        db['language_tokens'][language] ||= 0
-        db['language_tokens'][language] += 1
-        db['tokens_total'] += 1
+        v = db_tokens[token]
+        if v.nil?
+          db_tokens[token] = 1
+        else
+          db_tokens[token] = v + 1
+        end
       end
+      db['language_tokens'][language] ||= 0
+      db['language_tokens'][language] += tokens.length
+      db['tokens_total'] += tokens.length
       db['languages'][language] ||= 0
       db['languages'][language] += 1
       db['languages_total'] += 1
