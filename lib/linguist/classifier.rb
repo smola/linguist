@@ -51,8 +51,6 @@ module Linguist
       db['language_tokens'] ||= {}
       db['languages'] ||= {}
 
-
-
       db['tokens'][language] ||= {}
       db_tokens = db['tokens'][language]
 
@@ -72,6 +70,66 @@ module Linguist
       db['languages_total'] += 1
 
       nil
+    end
+
+    def self.merge(a, b)
+      db = {}
+      db['tokens_total'] = a['tokens_total'] + b['tokens_total']
+      db['languages_total'] = a['languages_total'] + b['languages_total']
+      db['languages'] = {}
+      db['language_tokens'] = {}
+      db['tokens'] = {}
+      a['languages'].keys.each { |lang|
+        db['languages'][lang] = a['languages'][lang]
+        db['language_tokens'][lang] = a['language_tokens'][lang]
+        db['tokens'][lang] = {}
+        a['tokens'][lang].each { |tok,freq|
+          db['tokens'][lang][tok] = freq
+        }
+      }
+      b['languages'].keys.each { |lang|
+        db['languages'][lang] ||= 0
+        db['languages'][lang] += b['languages'][lang]
+        db['language_tokens'][lang] ||= 0
+        db['language_tokens'][lang] += b['language_tokens'][lang]
+        db['tokens'][lang] ||= {}
+        b['tokens'][lang].each { |tok,freq|
+          db['tokens'][lang] ||= 0
+          db['tokens'][lang][tok] += freq
+        }
+      }
+      return db
+    end
+
+    def self.substract(a, b)
+      db = {}
+      db = {}
+      db['tokens_total'] = a['tokens_total'] - b['tokens_total']
+      db['languages_total'] = a['languages_total'] - b['languages_total']
+      db['languages'] = {}
+      db['language_tokens'] = {}
+      db['tokens'] = {}
+      a['languages'].keys.each { |lang|
+        db['languages'][lang] = a['languages'][lang]
+        db['language_tokens'][lang] = a['language_tokens'][lang]
+        db['tokens'][lang] = {}
+        a['tokens'][lang].each { |tok,freq|
+          db['tokens'][lang][tok] = freq
+        }
+      }
+      b['languages'].keys.each { |lang|
+        db['languages'][lang] ||= 0
+        if db['languages'].key?(lang)
+          db['languages'][lang] -= b['languages'][lang]
+          db['language_tokens'][lang] -= b['language_tokens'][lang]
+          b['tokens'][lang].each { |tok,freq|
+            if db['tokens'][lang].key?(tok)
+              db['tokens'][lang][tok] -= db['tokens'][lang].fetch(tok, 0) + freq
+            end
+          }
+        end
+      }
+      return db
     end
 
     # Public: Guess language of data.
