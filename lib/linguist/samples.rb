@@ -6,6 +6,7 @@ end
 
 require 'linguist/md5'
 require 'linguist/classifier'
+require 'linguist/classifier_tree'
 require 'linguist/shebang'
 
 module Linguist

@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "linguist"
+require "json"
+
+samples = Linguist::Samples
+ct = Linguist::TreeClassifier.new
+vocab = ct.gen_vocabulary(samples)
+dataset = ct.gen_dataset(vocab, samples)
+
+File.open('vocabulary.json', 'w') do |f|
+    f.write(vocab.to_h.to_json)
+end
+
+File.open('dataset.json', 'w') do |f|
+    dataset.each { |sample|
+        f.write(sample.to_json)
+        f.write("\n")
+    }
+end
