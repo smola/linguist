@@ -103,7 +103,6 @@ module Linguist
 
     def self.substract(a, b)
       db = {}
-      db = {}
       db['tokens_total'] = a['tokens_total'] - b['tokens_total']
       db['languages_total'] = a['languages_total'] - b['languages_total']
       db['languages'] = {}
@@ -118,13 +117,12 @@ module Linguist
         }
       }
       b['languages'].keys.each { |lang|
-        db['languages'][lang] ||= 0
         if db['languages'].key?(lang)
           db['languages'][lang] -= b['languages'][lang]
           db['language_tokens'][lang] -= b['language_tokens'][lang]
           b['tokens'][lang].each { |tok,freq|
             if db['tokens'][lang].key?(tok)
-              db['tokens'][lang][tok] -= db['tokens'][lang].fetch(tok, 0) + freq
+              db['tokens'][lang][tok] -= freq
             end
           }
         end
