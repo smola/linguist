@@ -63,14 +63,18 @@
     }
   }
 
-^[ \t]*(\/\/|--|\#|%|\")" ".*   { /* nothing */ }
+^[ \t]*\#" ".*   { feed_token("COMMENT#", STATIC_TOKEN); return 1; }
+^[ \t]*\/\/" ".* { feed_token("COMMENT//", STATIC_TOKEN); return 1; }
+^[ \t]*--" ".*   { feed_token("COMMENT--", STATIC_TOKEN); return 1; }
+^[ \t]*%" ".*    { feed_token("COMMENT%", STATIC_TOKEN); return 1; }
+^[ \t]*\"" ".*   { feed_token("COMMENT\"", STATIC_TOKEN); return 1; }
 
-"/*"                              { BEGIN(c_comment); }
+"/*"                              { feed_token("COMMENT/*", STATIC_TOKEN); BEGIN(c_comment); }
   /* See below for xml_comment start. */
-"{-"                              { BEGIN(haskell_comment); }
-"(*"                              { BEGIN(ocaml_comment); }
-"\"\"\""                          { BEGIN(python_dcomment); }
-"'''"                             { BEGIN(python_scomment); }
+"{-"                              { feed_token("COMMENT{-", STATIC_TOKEN); BEGIN(haskell_comment); return 1; }
+"(*"                              { feed_token("COMMENT(*", STATIC_TOKEN); BEGIN(ocaml_comment); return 1; }
+"\"\"\""                          { feed_token("COMMENT\"\"\"", STATIC_TOKEN); BEGIN(python_dcomment); return 1; }
+"'''"                             { feed_token("COMMENT'''", STATIC_TOKEN); BEGIN(python_scomment); return 1; }
 
 <c_comment,xml_comment,haskell_comment,ocaml_comment,python_dcomment,python_scomment>.|\n { /* nothing */ }
 <c_comment>"*/"                   { BEGIN(INITIAL); }
@@ -86,7 +90,9 @@
 (0x[0-9a-fA-F]([0-9a-fA-F]|\.)*|[0-9]([0-9]|\.)*)([uU][lL]{0,2}|([eE][-+][0-9]*)?[fFlL]*) { /* nothing */ }
 \<[[:alnum:]_!./?-]+              {
     if (strcmp(yytext, "<!--") == 0) {
-     BEGIN(xml_comment);
+      feed_token("COMMENT<!--", STATIC_TOKEN);
+      BEGIN(xml_comment);
+      return 1;
     } else {
       feed_token(strdup(yytext), SGML_TOKEN);
       BEGIN(sgml);

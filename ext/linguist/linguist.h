@@ -3,6 +3,7 @@ enum tokenizer_type {
   REGULAR_TOKEN,
   SHEBANG_TOKEN,
   SGML_TOKEN,
+  STATIC_TOKEN
 };
 
 struct tokenizer_extra {

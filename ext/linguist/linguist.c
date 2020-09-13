@@ -58,6 +58,10 @@ static VALUE rb_tokenizer_extract_tokens(VALUE self, VALUE rb_data) {
 			}
 			free(extra.token);
 			break;
+		case STATIC_TOKEN:
+			len = strlen(extra.token);
+			rb_ary_push(ary, rb_str_new(extra.token, len));
+			break;
 		}
 	} while (r);
 
