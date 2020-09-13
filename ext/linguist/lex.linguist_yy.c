@@ -1483,7 +1483,7 @@ YY_RULE_SETUP
 case 16:
 YY_RULE_SETUP
 #line 109 "tokenizer.l"
-{ FEED_STATIC("COMMENT<!--"); BEGIN(xml_comment); }
+{ FEED_STATIC("COMMENT<!--"); BEGIN(xml_comment); return 1; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
