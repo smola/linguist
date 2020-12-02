@@ -61,7 +61,7 @@ module Linguist
       termfreq = to_vocabulary_index_termfreq(db['vocabulary'], tokens)
       db['samples'][language] << termfreq
 
-      nil
+      termfreq
     end
 
     # Public: Finalize training.

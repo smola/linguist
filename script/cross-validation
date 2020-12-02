@@ -25,11 +25,14 @@ end
 STDERR.puts "Loading"
 
 $samples = []
+db = {}
 Samples.each do |sample|
   sample[:data] = File.read(sample[:path])
-  sample[:tokens] = Tokenizer.tokenize(sample[:data])
+  sample[:pretrained] = Classifier.train! db, sample[:language], sample[:data]
   $samples << sample
 end
+$global_vocab = db['vocabulary'].dup
+db = nil
 
 STDERR.puts "Loaded"
 
@@ -73,12 +76,15 @@ def eval(sample)
   #end
 
   db = {}
+  db['vocabulary'] = $global_vocab.dup
+  db['samples'] = {}
   train_samples.each do |train_sample|
-    Classifier.train! db, train_sample[:language], train_sample[:tokens]
+    language = train_sample[:language]
+    pretrained = train_sample[:pretrained]
+    db['samples'][language] ||= []
+    db['samples'][language] << pretrained
   end
-  if Classifier.respond_to? :finalize_train!
-    Classifier.finalize_train! db
-  end
+  Classifier.finalize_train! db
 
   results = Classifier.classify(db, sample[:data], languages)
   if results.length == 0
