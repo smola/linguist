@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+
+require 'parallel'
+require 'linguist'
+include Linguist
+
+all = false
+if ARGV[0] == '--all'
+  all = true
+  ARGV.shift
+end
+
+$skip_extensions = Set.new()
+
+if not all
+  # Skip extensions with catch-all rule
+  Heuristics.all.each do |h|
+    rules = h.instance_variable_get(:@rules)
+    if rules[-1]['pattern'].is_a? AlwaysMatch
+      $skip_extensions |= Set.new(h.extensions)
+    end
+  end
+end
+
+STDERR.puts "Loading"
+
+$samples = []
+Samples.each do |sample|
+  sample[:data] = File.read(sample[:path])
+  sample[:tokens] = Tokenizer.tokenize(sample[:data])
+  $samples << sample
+end
+
+STDERR.puts "Loaded"
+
+def eval(sample)
+  if $skip_extensions.include? sample[:extname]
+    return []
+  end
+
+  languages = Language.find_by_filename(sample[:path]).map(&:name)
+  if languages.length == 1
+    return []
+  end
+
+  languages = Language.find_by_extension(sample[:path]).map(&:name)
+  if languages.length <= 1
+    return []
+  end
+
+  # Test only languages with at least 2 samples
+  n_samples = 0
+  $samples.each do |other_sample|
+    if other_sample[:language] == sample[:language]
+      n_samples += 1
+    end
+  end
+  if n_samples <= 1
+    STDERR.puts "Needs more samples: #{sample[:language]}, #{sample[:extname]}"
+    return []
+  end
+
+  train_samples = []
+  $samples.each do |train_sample|
+    next if sample == train_sample
+    #next if not languages.include? train_sample[:language]
+    train_samples << train_sample
+  end
+
+  #languages = Set.new(train_samples.map { |s| s[:language] }).to_a
+  #if languages.length <= 1
+  #  return []
+  #end
+
+  db = {}
+  train_samples.each do |train_sample|
+    Classifier.train! db, train_sample[:language], train_sample[:tokens]
+  end
+  if Classifier.respond_to? :finalize_train!
+    Classifier.finalize_train! db
+  end
+
+  results = Classifier.classify(db, sample[:data], languages)
+  if results.length == 0
+    ["#{sample[:path]} BAD(UNK)"]
+  elsif sample[:language] == results.first[0]
+    ["#{sample[:path]} GOOD"]
+  else
+    ["#{sample[:path]} BAD(#{results.first[0]})"]
+  end
+end
+
+results = Parallel.flat_map($samples) do |sample|
+  eval(sample)
+end
+
+results.each do |res|
+  puts res
+end
