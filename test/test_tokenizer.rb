@@ -169,9 +169,9 @@ class TestTokenizer < Minitest::Test
     assert_equal %w(~ a), tokenize("~a")
 
     # Edge cases
-    assert_equal %w(-!#$%&*+,.:;<=>?@\\^_`|~), tokenize("-!#$%&*+,.:;<=>?@\\^_`|~")
-    assert_equal %w(-!#$%&*+,.:;<=>?@\\^_`|~*/), tokenize("-!#$%&*+,.:;<=>?@\\^_`|~*/")
-    assert_equal %w(/-!#$%&*+,.:;<=>?@\\^_`|~), tokenize("/-!#$%&*+,.:;<=>?@\\^_`|~")
+    assert_equal %w(-!#$%&*+,.:;<=>?), tokenize("-!#$%&*+,.:;<=>?@\\^_`|~")
+    assert_equal %w(-!#$%&*+,.:;<=>?), tokenize("-!#$%&*+,.:;<=>?@\\^_`|~*/")
+    assert_equal %w(/-!#$%&*+,.:;<=>), tokenize("/-!#$%&*+,.:;<=>?@\\^_`|~")
   end
 
   def test_c_tokens
