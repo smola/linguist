@@ -1,19 +1,27 @@
 #!/usr/bin/env ruby
 
+if ARGV.include? '--help' or ARGV.include? '-h'
+  puts "Usage: #{$PROGRAM_NAME} [--all]"
+  puts ""
+  puts "Performs leave-one-out cross-validation of the classifier."
+  puts "By default, outputs results only for samples with ambiguous extensions."
+  puts "If the --all flag is given, all samples and languages are considered."
+  exit 0
+end
+
 require 'parallel'
 require 'linguist'
 include Linguist
 
-all = false
+$all = false
 if ARGV[0] == '--all'
-  all = true
-  ARGV.shift
+  $all = true
 end
 
+# Skip extensions with catch-all heuristic.
+# Disabled with --all.
 $skip_extensions = Set.new()
-
-if not all
-  # Skip extensions with catch-all rule
+unless $all
   Heuristics.all.each do |h|
     rules = h.instance_variable_get(:@rules)
     if rules[-1]['pattern'].is_a? AlwaysMatch
@@ -21,8 +29,6 @@ if not all
     end
   end
 end
-
-STDERR.puts "Loading"
 
 $samples = []
 db = {}
@@ -34,21 +40,25 @@ end
 $global_vocab = db['vocabulary'].dup
 db = nil
 
-STDERR.puts "Loaded"
-
 def eval(sample)
   if $skip_extensions.include? sample[:extname]
-    return []
+    return nil
   end
 
-  languages = Language.find_by_filename(sample[:path]).map(&:name)
-  if languages.length == 1
-    return []
-  end
-
-  languages = Language.find_by_extension(sample[:path]).map(&:name)
-  if languages.length <= 1
-    return []
+  # If --all is set, use all languages. Otherwise, get only languages that are
+  # ambiguous in terms of filename and extension.
+  if $all
+    # Empty languages array is the same as all languages.
+    languages = []
+  else
+    languages = Language.find_by_filename(sample[:path]).map(&:name)
+    if languages.length == 1
+      return nil
+    end
+    languages = Language.find_by_extension(sample[:path]).map(&:name)
+    if languages.length <= 1
+      return nil
+    end
   end
 
   # Test only languages with at least 2 samples
@@ -59,25 +69,15 @@ def eval(sample)
     end
   end
   if n_samples <= 1
-    STDERR.puts "Needs more samples: #{sample[:language]}, #{sample[:extname]}"
-    return []
+    STDERR.puts "WARNING: No cross-validation possible for #{sample[:language]} (only one sample)"
+    return nil
   end
 
-  train_samples = []
-  $samples.each do |train_sample|
-    next if sample == train_sample
-    #next if not languages.include? train_sample[:language]
-    train_samples << train_sample
-  end
-
-  #languages = Set.new(train_samples.map { |s| s[:language] }).to_a
-  #if languages.length <= 1
-  #  return []
-  #end
-
+  # Train the classifier.
   db = {}
   db['vocabulary'] = $global_vocab.dup
   db['samples'] = {}
+  train_samples = $samples.select { |s| s[:path] != sample[:path] }
   train_samples.each do |train_sample|
     language = train_sample[:language]
     pretrained = train_sample[:pretrained]
@@ -86,20 +86,21 @@ def eval(sample)
   end
   Classifier.finalize_train! db
 
+  # Get result.
   results = Classifier.classify(db, sample[:data], languages)
+  path = sample[:path].sub("#{Samples::ROOT}/", "")
   if results.length == 0
-    ["#{sample[:path]} BAD(UNK)"]
+    "#{path} BAD (Unknown)"
   elsif sample[:language] == results.first[0]
-    ["#{sample[:path]} GOOD"]
+    "#{path} GOOD"
   else
-    ["#{sample[:path]} BAD(#{results.first[0]})"]
+    "#{path} BAD (#{results.first[0]})"
   end
 end
 
-results = Parallel.flat_map($samples) do |sample|
-  eval(sample)
-end
-
+results = Parallel.map($samples) { |sample| eval(sample) }
+results.reject! { |s| s.nil? }
+results.sort!
 results.each do |res|
   puts res
 end
