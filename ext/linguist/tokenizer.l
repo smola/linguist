@@ -116,7 +116,15 @@ not_punct [^-!#$%&*+,./:;<=>?@\\^_`|~]
 \"\"|''                           { /* nothing */ }
 \"                                { eat_until_unescaped('"'); }
 '                                 { eat_until_unescaped('\''); }
-(0x[0-9a-fA-F]([0-9a-fA-F]|\.)*|[0-9]([0-9]|\.)*)([uU][lL]{0,2}|([eE][-+][0-9]*)?[fFlL]*) { /* nothing */ }
+
+[$][0-9]+                         { FEED_STATIC("LIT$INTDEC"); return 1; }
+[#][0-9]+                         { FEED_STATIC("LIT#INTDEC"); return 1; }
+[$][0-9a-fA-F]+                   { FEED_STATIC("LIT$INTHEX"); return 1; }
+0[xX][0-9a-fA-F]+                 { FEED_STATIC("LIT0xINTHEX"); return 1; }
+[0-9a-fA-F]+h                     { FEED_STATIC("LITINTHEXh"); return 1; }
+0[0-7]+                           { FEED_STATIC("LITINTOCT"); return 1; }
+[0-9]+                            { FEED_STATIC("LITINTDEC"); return 1; }
+(0[xX][0-9a-fA-F]([0-9a-fA-F]|\.)*|[0-9]([0-9]|\.)*)([uU][lL]{0,2}|([eE][-+][0-9]*)?[fFlL]*) { FEED_STATIC("LITNUM#"); return 1; }
 
 [.@#]?[[:alnum:]_]+               { FEED(); return 1; }
 "()"|"{}"|"[]"                    { FEED(); return 1; }
@@ -131,7 +139,7 @@ not_punct [^-!#$%&*+,./:;<=>?@\\^_`|~]
 <INITIAL,punct>[</]                       { yymore(); BEGIN(punct); }
 <punct><<EOF>>                            { FEED2(yytext, yyleng - 1); BEGIN(INITIAL); return 1; }
 
-.|\n                              { /* nothing */ }
+.|\n                                 { /* nothing */ }
 
 %%
 

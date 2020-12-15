@@ -20,14 +20,23 @@ class TestTokenizer < Minitest::Test
     assert_equal %w(print , ,), tokenize("print 'Hello', '', 'Josh'")
   end
 
-  def test_skip_number_literals
-    assert_equal %w(+), tokenize('1 + 1')
-    assert_equal %w(add \( , \)), tokenize('add(123, 456)')
-    assert_equal %w(|), tokenize('0x01 | 0x10')
-    assert_equal %w(*), tokenize('500.42 * 1.0')
-    assert_equal %w(), tokenize('1.23e-04')
-    assert_equal %w(), tokenize('1.0f')
-    assert_equal %w(), tokenize('1234ULL')
+  def test_number_literals
+    assert_equal %w(LITINTDEC LITINTDEC LITINTDEC), tokenize("1 10 99")
+    assert_equal %w(LIT$INTDEC LIT$INTDEC LIT$INTDEC), tokenize("$0 $1 $9999")
+    assert_equal %w(LIT#INTDEC LIT#INTDEC LIT#INTDEC), tokenize("#0 #1 #9999")
+    assert_equal %w(LIT$INTHEX), tokenize("$0ADE")
+    assert_equal %w(LIT0xINTHEX LIT0xINTHEX LIT0xINTHEX), tokenize("0x01 0xAA 0xff")
+    assert_equal %w(LITINTHEXh), tokenize("02E8h")
+    assert_equal %w(LITINTOCT LITINTOCT LITINTOCT), tokenize("00 000 0000")
+    assert_equal %w(LITINTOCT LITINTOCT), tokenize("0644 0777")
+
+    assert_equal %w(LITINTDEC + LITINTDEC), tokenize('1 + 1')
+    assert_equal %w(add \( LITINTDEC , LITINTDEC \)), tokenize('add(123, 456)')
+    assert_equal %w(LIT0xINTHEX | LIT0xINTHEX), tokenize('0x01 | 0x10')
+    assert_equal %w(LITNUM# * LITNUM#), tokenize('500.42 * 1.0')
+    assert_equal %w(LITNUM#), tokenize('1.23e-04')
+    assert_equal %w(LITNUM#), tokenize('1.0f')
+    assert_equal %w(LITNUM#), tokenize('1234ULL')
     assert_equal %w(G1 X55 Y5 F2000), tokenize('G1 X55 Y5 F2000')
   end
 
@@ -78,7 +87,7 @@ class TestTokenizer < Minitest::Test
 
     assert_equal %w(COMMENT%), tokenize("%\n")
     assert_equal %w(COMMENT%), tokenize("%%\n")
-    assert_equal %w(% COMMENT%), tokenize("2 % 10\n% Comment")
+    assert_equal %w(LITINTDEC % LITINTDEC COMMENT%), tokenize("2 % 10\n% Comment")
 
     assert_equal %w(foo COMMENT""" bar), tokenize("foo\n\"\"\"\nComment\n\"\"\"\nbar")
     assert_equal %w(foo COMMENT''' bar), tokenize("foo\n'''\nComment\n'''\nbar")
@@ -91,7 +100,7 @@ class TestTokenizer < Minitest::Test
     assert_equal %w(COMMENT.ig), tokenize(".ig\nComment\n..")
 
     # Easily mistaken with comment
-    assert_equal %w(*/), tokenize("1 */ 2")
+    assert_equal %w(LITINTDEC */ LITINTDEC), tokenize("1 */ 2")
   end
 
   def test_sgml_tags
@@ -107,41 +116,41 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_operators
-    assert_equal %w(+), tokenize("1 + 1")
-    assert_equal %w(+), tokenize("1+1")
-    assert_equal %w(-), tokenize("1 - 1")
-    assert_equal %w(-), tokenize("1-1")
-    assert_equal %w(*), tokenize("1 * 1")
-    assert_equal %w(*), tokenize("1*1")
+    assert_equal %w(LITINTDEC + LITINTDEC), tokenize("1 + 1")
+    assert_equal %w(LITINTDEC + LITINTDEC), tokenize("1+1")
+    assert_equal %w(LITINTDEC - LITINTDEC), tokenize("1 - 1")
+    assert_equal %w(LITINTDEC - LITINTDEC), tokenize("1-1")
+    assert_equal %w(LITINTDEC * LITINTDEC), tokenize("1 * 1")
+    assert_equal %w(LITINTDEC * LITINTDEC), tokenize("1*1")
     assert_equal %w(a ** b), tokenize("a ** b")
-    assert_equal %w(**), tokenize("1**2")
+    assert_equal %w(LITINTDEC ** LITINTDEC), tokenize("1**2")
     assert_equal %w(a ** b), tokenize("a**b")
-    assert_equal %w(/), tokenize("1 / 1")
-    assert_equal %w(/), tokenize("1/1")
-    assert_equal %w(//), tokenize("1 // 1")
-    assert_equal %w(//), tokenize("1//1")
-    assert_equal %w(%), tokenize("2 % 5")
-    assert_equal %w(%), tokenize("2%5")
-    assert_equal %w(&), tokenize("1 & 1")
-    assert_equal %w(&), tokenize("1&1")
-    assert_equal %w(&&), tokenize("1 && 1")
-    assert_equal %w(&&), tokenize("1&&1")
-    assert_equal %w(|), tokenize("1 | 1")
-    assert_equal %w(|), tokenize("1|1")
-    assert_equal %w(||), tokenize("1 || 1")
-    assert_equal %w(||), tokenize("1||1")
-    assert_equal %w(<), tokenize("1 < 0x01")
+    assert_equal %w(LITINTDEC / LITINTDEC), tokenize("1 / 1")
+    assert_equal %w(LITINTDEC / LITINTDEC), tokenize("1/1")
+    assert_equal %w(LITINTDEC // LITINTDEC), tokenize("1 // 1")
+    assert_equal %w(LITINTDEC // LITINTDEC), tokenize("1//1")
+    assert_equal %w(LITINTDEC % LITINTDEC), tokenize("2 % 5")
+    assert_equal %w(LITINTDEC % LITINTDEC), tokenize("2%5")
+    assert_equal %w(LITINTDEC & LITINTDEC), tokenize("1 & 1")
+    assert_equal %w(LITINTDEC & LITINTDEC), tokenize("1&1")
+    assert_equal %w(LITINTDEC && LITINTDEC), tokenize("1 && 1")
+    assert_equal %w(LITINTDEC && LITINTDEC), tokenize("1&&1")
+    assert_equal %w(LITINTDEC | LITINTDEC), tokenize("1 | 1")
+    assert_equal %w(LITINTDEC | LITINTDEC), tokenize("1|1")
+    assert_equal %w(LITINTDEC || LITINTDEC), tokenize("1 || 1")
+    assert_equal %w(LITINTDEC || LITINTDEC), tokenize("1||1")
+    assert_equal %w(LITINTDEC < LIT0xINTHEX), tokenize("1 < 0x01")
     #assert_equal %w(<), tokenize("1<0x01")
-    assert_equal %w(<<), tokenize("1 << 0x01")
-    assert_equal %w(<<), tokenize("1<<0x01")
-    assert_equal %w(<<<), tokenize("1 <<< 0x01")
-    assert_equal %w(<<<), tokenize("1<<<0x01")
-    assert_equal %w(>), tokenize("1 > 0x01")
-    assert_equal %w(>), tokenize("1>0x01")
-    assert_equal %w(>>), tokenize("1 >> 0x01")
-    assert_equal %w(>>), tokenize("1>>0x01")
-    assert_equal %w(>>>), tokenize("1 >>> 0x01")
-    assert_equal %w(>>>), tokenize("1>>>0x01")
+    assert_equal %w(LITINTDEC << LIT0xINTHEX), tokenize("1 << 0x01")
+    assert_equal %w(LITINTDEC << LIT0xINTHEX), tokenize("1<<0x01")
+    assert_equal %w(LITINTDEC <<< LIT0xINTHEX), tokenize("1 <<< 0x01")
+    assert_equal %w(LITINTDEC <<< LIT0xINTHEX), tokenize("1<<<0x01")
+    assert_equal %w(LITINTDEC > LIT0xINTHEX), tokenize("1 > 0x01")
+    assert_equal %w(LITINTDEC > LIT0xINTHEX), tokenize("1>0x01")
+    assert_equal %w(LITINTDEC >> LIT0xINTHEX), tokenize("1 >> 0x01")
+    assert_equal %w(LITINTDEC >> LIT0xINTHEX), tokenize("1>>0x01")
+    assert_equal %w(LITINTDEC >>> LIT0xINTHEX), tokenize("1 >>> 0x01")
+    assert_equal %w(LITINTDEC >>> LIT0xINTHEX), tokenize("1>>>0x01")
     assert_equal %w(a --), tokenize("a--")
     assert_equal %w(a ++), tokenize("a++")
     assert_equal %w(-- a), tokenize("--a")
@@ -176,7 +185,7 @@ class TestTokenizer < Minitest::Test
 
   def test_c_tokens
     assert_equal %w(#ifndef HELLO_H #define HELLO_H void hello \(\) ; #endif), tokenize(:"C/hello.h")
-    assert_equal %w(#include < stdio .h > int main \(\) { printf \( \) ; return ; }), tokenize(:"C/hello.c")
+    assert_equal %w(#include < stdio .h > int main \(\) { printf \( \) ; return LITINTDEC ; }), tokenize(:"C/hello.c")
   end
 
   def test_cpp_tokens
@@ -187,11 +196,11 @@ class TestTokenizer < Minitest::Test
   def test_objective_c_tokens
     assert_equal %w(#import < Foundation / Foundation .h > @interface Foo : NSObject { } @end), tokenize(:"Objective-C/Foo.h")
     assert_equal %w(#import @implementation Foo @end), tokenize(:"Objective-C/Foo.m")
-    assert_equal %w(#import < Cocoa / Cocoa .h > int main \( int argc , char * argv [] \) { NSLog \( @ \) ; return ; }), tokenize(:"Objective-C/hello.m")
+    assert_equal %w(#import < Cocoa / Cocoa .h > int main \( int argc , char * argv [] \) { NSLog \( @ \) ; return LITINTDEC ; }), tokenize(:"Objective-C/hello.m")
   end
 
   def test_perl_tokens
-    assert_equal %w(COMMENT# COMMENT# COMMENT# package POSIX ; #line sub getchar { usage if @_ != ; CORE :: getc \( STDIN \) ; } COMMENT# ;), tokenize(:"Perl/getchar.al")
+    assert_equal %w(COMMENT# COMMENT# COMMENT# package POSIX ; #line LITINTDEC sub getchar { usage if @_ != LITINTDEC ; CORE :: getc \( STDIN \) ; } COMMENT# LITINTDEC ;), tokenize(:"Perl/getchar.al")
   end
 
   def test_shebang
@@ -213,7 +222,7 @@ class TestTokenizer < Minitest::Test
   end
 
   def test_json_tokens
-    assert_equal %w( { : , : , : , : [ , ] , : { : , : } } ), tokenize(:"JSON/product.json")
+    assert_equal %w( { : LITINTDEC , : , : LITINTDEC , : [ , ] , : { : LITINTDEC , : LITINTDEC } } ), tokenize(:"JSON/product.json")
   end
 
   def test_ruby_tokens
