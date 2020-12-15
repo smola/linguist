@@ -84,8 +84,11 @@ not_punct [^-!#$%&*+,./:;<=>?@\\^_`|~]
 }
 
 ^[ \t]*[#]+(" ".*|\n)    { FEED_STATIC("COMMENT#"); return 1; }
-^[ \t]*"//!"(" ".*|\n)   { FEED_STATIC("COMMENT//!"); return 1; }
-^[ \t]*[/][/]+(" ".*|\n) { FEED_STATIC("COMMENT//"); return 1; }
+^[ \t]*"//+"(.*|\n)      { FEED_STATIC("COMMENT//+"); return 1; }
+^[ \t]*"//-"(.*|\n)      { FEED_STATIC("COMMENT//-"); return 1; }
+^[ \t]*"//|"(.*|\n)      { FEED_STATIC("COMMENT//|"); return 1; }
+^[ \t]*"//!"(.*|\n)      { FEED_STATIC("COMMENT//!"); return 1; }
+^[ \t]*[/][/]+(.*|\n)    { FEED_STATIC("COMMENT//"); return 1; }
 ^[ \t]*"--"(" ".*|\n)    { FEED_STATIC("COMMENT--"); return 1; }
 ^[ \t]*[%]+(" ".*|\n)    { FEED_STATIC("COMMENT%"); return 1; }
 ^[ \t]*\"(" ".*|\n)      { FEED_STATIC("COMMENT\""); return 1; }
