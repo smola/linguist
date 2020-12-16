@@ -310,9 +310,14 @@ module Linguist
 
       def self.similarity(a, b)
         sum = 0.0
+        js = a.keys.to_set | b.keys.to_set
         a.each_key do |idx|
           if b.key? idx
-            sum += a[idx] * b[idx]
+            part_sum = 0.0
+            js.each do |j|
+              part_sum += [a[j].to_f / a[idx], b[j].to_f / b[idx]].max
+            end
+            sum += 1.0 / part_sum
           end
         end
         sum
