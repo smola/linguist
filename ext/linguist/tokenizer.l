@@ -142,7 +142,11 @@ not_punct [^-!#$%&*+,./:;<=>?@\\^_`|~(){}\[\]]
 <INITIAL,punct>[</({]                     { yymore(); BEGIN(punct); }
 <punct><<EOF>>                            { FEED2(yytext, yyleng - 1); BEGIN(INITIAL); return 1; }
 
-.|\n                                 { /* nothing */ }
+^[ ]+                               { FEED_STATIC("^\\s+"); return 1; }
+^[\t]+                               { FEED_STATIC("^\\t+"); return 1; }
+^[ \t]+                               { FEED_STATIC("^[\\s\\t]+"); return 1; }
+\n                                   { FEED_STATIC("\\n"); return 1; }
+.                                 { /* nothing */ }
 
 %%
 
